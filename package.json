@@ -16,7 +16,7 @@
   "dependencies": {
     "@novice1/logger": "^1.1.1",
     "@novice1/parameters": "^1.0.0",
-    "@novice1/routing": "^1.0.8",
+    "@novice1/routing": "^1.0.9",
     "express": "^4.17.1"
   },
   "devDependencies": {
