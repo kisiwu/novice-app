@@ -1,7 +1,7 @@
 {
   "name": "@novice1/app",
   "private": false,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -14,12 +14,12 @@
   "author": "demingongo",
   "license": "MIT",
   "dependencies": {
-    "@novice1/logger": "^1.1.1",
-    "@novice1/parameters": "^1.0.0",
-    "@novice1/routing": "^1.0.9",
+    "@novice1/logger": "^1.1.2",
+    "@novice1/parameters": "^1.0.1",
+    "@novice1/routing": "^1.0.10",
     "express": "^4.17.1"
   },
   "devDependencies": {
-    "kaukau": "0.0.70"
+    "kaukau": "0.0.71"
   }
 }
