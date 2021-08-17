@@ -1,7 +1,7 @@
 import core from 'express-serve-static-core';
-import { FrameworkApp } from '../app';
+import { IApp } from '../baseApp';
 
-export function addReplyMiddleware(app: FrameworkApp): core.RequestHandler  {
+export function addReplyMiddleware(app: IApp): core.RequestHandler  {
   return function replyMiddleware(_, res, next){
   
     // set functions

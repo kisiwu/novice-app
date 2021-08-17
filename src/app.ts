@@ -1,256 +1,1064 @@
-import http from 'http';
-import net from 'net';
-import express from 'express';
 import core from 'express-serve-static-core';
-import routing, { IRouter, RequestHandler } from '@novice1/routing';
-import { addReplyMiddleware } from './middlewares/reply'
 import { ParsedQs } from 'qs';
+import { 
+  IRouter, 
+  RequestHandler, 
+  RequestHandlerParams, 
+  RouteSettings, 
+  RouteSettingsParams 
+} from '@novice1/routing';
+import { BaseApp, Options } from './baseApp';
 
-export interface Options {
-  framework?: {
-    auth?: RequestHandler[];
-    middlewares?: (core.RequestHandler | core.RequestHandlerParams)[];
-    validators?: RequestHandler[];
-  };
-  routers?: IRouter[]
-}
+/**
+ * The application
+ */
+export class FrameworkApp extends BaseApp {
 
-export class FrameworkApp {
-  #app: express.Application;
-  #config: Options = {};
-  #router: IRouter;
-  #server?: http.Server;
-
-  #isBuilding = false;
-  #isBuilt = false;
-
-  get building(): boolean {
-    return this.#isBuilding;
-  }
-
-  get built(): boolean {
-    return this.#isBuilt;
-  }
-
-  get meta(): routing.RouteMeta[] {
-    return this.#router.getMeta();
-  }
-
-  get server(): http.Server | undefined {
-    return this.#server;
-  }
-
-  constructor(options?: Options) {
-    this.#app = express();
-    this.#router = routing();
-    this.addOptions(options || {});
-  }
-
-  private _registerRouter(router: IRouter): void {
-    if (
-      this.#config?.framework?.validators?.length
-      && typeof router.setValidatorsIfNone === 'function') {
-      router.setValidatorsIfNone(this.#config.framework.validators);
-    }
-    if (
-      this.#config?.framework?.auth?.length
-      && typeof router.setAuthHandlersIfNone === 'function') {
-      router.setAuthHandlersIfNone(this.#config.framework.auth);
-    }
-    this.#router.use(router);
-  }
-
-  private _buildFramework(): void {
-    // register main router
-    this.#app.use(this.#router);
-
-    // register framework's middlewares
-    this.#router.use(addReplyMiddleware(this));
-
-    // register user's middlewares
-    if (this.#config.framework?.middlewares?.length) {
-      this.#router.use(...this.#config.framework.middlewares);
-    }
-  }
-
-  private _buildRoutes(): void {
-    this.#config.routers?.forEach(
-      router => {
-        this._registerRouter(router);
-      }
-    );
-  }
+  //--- OVERRIDE METHODS
 
   addOptions(options: Options): FrameworkApp {
-    if (options && typeof options === 'object') {
-      if (options.framework) {
-        //this.addFrameworkConfig(options.framework);
-      }
-      if (options.routers) {
-        this.addRouters(options.routers);
-      }
-    }
+    super.addOptions(options);
     return this;
   }
 
   addRouters(routers: IRouter[] | IRouter): FrameworkApp {
-    if (!this.built) {
-      if (routers) {
-        if (Array.isArray(routers)) {
-          routers.forEach(
-            router => {
-              this.#config.routers = this.#config.routers || [];
-              this.#config.routers.push(router);
-            }
-          );
-        } else {
-          this.#config.routers = this.#config.routers || [];
-          this.#config.routers.push(routers);
-        }
-      }
-    } else {
-      if (routers) {
-        if (Array.isArray(routers)) {
-          routers.forEach(
-            router => {
-              this._registerRouter(router);
-            }
-          );
-        } else {
-          this._registerRouter(routers);
-        }
-      }
-    }
+    super.addRouters(routers);
     return this;
-  }
-
-  build(options?: http.ServerOptions): http.Server {
-    if (!this.#server /*&& !this.#isBuilding*/) {
-      this.#isBuilding = true;
-
-      this._buildFramework();
-
-      this._buildRoutes();
-
-      this.#isBuilt = true;
-      this.#isBuilding = false;
-
-      this.#server = http.createServer(options || {}, this.#app);
-    }
-
-    return this.#server;
-  }
-
-  listen(port?: number, hostname?: string, backlog?: number, listeningListener?: () => void): http.Server;
-  listen(port?: number, hostname?: string, listeningListener?: () => void): http.Server;
-  listen(port?: number, backlog?: number, listeningListener?: () => void): http.Server;
-  listen(port?: number, listeningListener?: () => void): http.Server;
-  listen(path: string, backlog?: number, listeningListener?: () => void): http.Server;
-  listen(path: string, listeningListener?: () => void): http.Server;
-  listen(options: net.ListenOptions, listeningListener?: () => void): http.Server;
-  listen(handle: unknown, backlog?: number, listeningListener?: () => void): http.Server;
-  listen(handle: unknown, listeningListener?: () => void): http.Server;
-  listen(
-    a1?: number | string | net.ListenOptions,
-    a2?: string | number | (() => void),
-    a3?: number | (() => void),
-    a4?: () => void): http.Server {
-    const server = this.build();
-    let r: http.Server;
-    if (typeof a1 === 'number') {
-      if (typeof a2 === 'string') {
-        if (typeof a3 === 'number') {
-          // 1
-          r = server.listen(a1, a2, a3, a4);
-        } else {
-          // 2
-          r = server.listen(a1, a2, a3);
-        }
-      } else if (typeof a2 === 'number') {
-        if (typeof a3 === 'function') {
-          // 3-8
-          r = server.listen(a1, a2, a3);
-        } else {
-          // 3-8
-          r = server.listen(a1, a2);
-        }
-      } else {
-        // 4-9
-        r = server.listen(a1, a2);
-      }
-    } else if (typeof a1 === 'string') {
-      if (typeof a2 === 'number') {
-        if (typeof a3 === 'function') {
-          // 5-8
-          r = server.listen(a1, a2, a3);
-        } else {
-          // 5-8
-          r = server.listen(a1, a2);
-        }
-      } else if (typeof a2 === 'function') {
-        // 6-9
-        r = server.listen(a1, a2);
-      } else {
-        // 5-6-8-9
-        r = server.listen(a1);
-      }
-    } else {
-      if (typeof a2 === 'number') {
-        if (typeof a3 === 'function') {
-          // 8
-          r = server.listen(a1, a2, a3);
-        } else {
-          // 8
-          r = server.listen(a1, a2);
-        }
-      } else if (typeof a2 === 'function') {
-        // 7-9
-        r = server.listen(a1, a2);
-      } else {
-        // 7-8-9
-        r = server.listen(a1);
-      }
-    }
-    return r;
   }
 
   disable(setting: string): FrameworkApp {
-    this.#app.disable(setting);
+    super.disable(setting);
     return this;
-  }
-
-  disabled(setting: string): boolean {
-    return this.#app.disabled(setting);
   }
 
   enable(setting: string): FrameworkApp {
-    this.#app.enable(setting);
+    super.enable(setting);
     return this;
   }
 
-  enabled(setting: string): boolean {
-    return this.#app.enabled(setting);
+  on(event: string, callback: (parent: core.Application) => void): FrameworkApp {
+    super.on(event, callback);
+    return this;
   }
 
   set(setting: string, val?: unknown): FrameworkApp {
-    this.#app.set(setting, val);
+    super.set(setting, val);
+    return this;
+  }
+
+  //--- LAZYROUTER METHODS
+
+  param(
+    name: string | string[],
+    handler: core.RequestParamHandler): FrameworkApp {
+    if (Array.isArray(name)) {
+      name.forEach(n => {
+        this.param(n, handler);
+      });
+    } else {
+      this.lazyrouter().param(name, handler);
+    }
+    return this;
+  }
+
+  all<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  all<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  all<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  all<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  all<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  all<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  all<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  all<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  all(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  all<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().all(path, ...handlers);
     return this;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get(setting: string): any {
-    return this.#app.get(setting);
+  get(setting: string): any;
+  get<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  get<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  get<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  get<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  get<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  get<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  get<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  get<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  get(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get<Path extends string>(
+    path: Path | string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...handlers: Array<RequestHandler>): FrameworkApp | any {
+    if (handlers.length == 1 && typeof path === 'string') {
+      return super.get(path);
+    } else {
+      this.lazyrouter().get(path, ...handlers);
+      return this;
+    }
   }
 
-  on(event: string, callback: (parent: core.Application) => void): FrameworkApp {
-    this.#app.on(event, callback);
+  post<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  post<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  post<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  post<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  post<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  post<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  post<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  post<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  post(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  post<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().post(path, ...handlers);
     return this;
   }
 
-  lazyrouter(): IRouter {
-    const lazyrouter = routing();
-    this.addRouters(lazyrouter);
-    return lazyrouter;
+  put<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  put<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  put<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  put<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  put<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  put<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  put<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  put<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  put(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  put<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().put(path, ...handlers);
+    return this;
+  }
+
+  delete<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  delete<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  delete<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  delete<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  delete<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  delete<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  delete<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  delete<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  delete(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  delete<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().delete(path, ...handlers);
+    return this;
+  }
+
+  patch<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  patch<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  patch<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  patch<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  patch<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  patch<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  patch<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  patch<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  patch(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  patch<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().patch(path, ...handlers);
+    return this;
+  }
+
+  options<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  options<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  options<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  options<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  options<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  options<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  options<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  options<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  options(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  options<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().options(path, ...handlers);
+    return this;
+  }
+
+  head<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  head<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  head<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  head<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MetaResType = any
+  >(
+    path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
+  ): FrameworkApp;
+  head<
+    Route extends string,
+    P = core.RouteParameters<Route>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Route,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  head<
+    Path extends string,
+    P = core.RouteParameters<Path>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: Path,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  head<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  head<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    path: core.PathParams,
+    ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
+  ): FrameworkApp;
+  head(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  head<Path extends string>(
+    path: Path,
+    ...handlers: Array<RequestHandler>): FrameworkApp {
+    this.lazyrouter().head(path, ...handlers);
+    return this;
   }
 
   use(...handlers: Array<core.RequestHandler<core.RouteParameters<string>>>): FrameworkApp;
