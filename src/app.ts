@@ -309,7 +309,7 @@ export class FrameworkApp extends BaseApp {
     path: Path | string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...handlers: Array<RequestHandler>): FrameworkApp | any {
-    if (handlers.length == 1 && typeof path === 'string') {
+    if (!handlers.length && typeof path === 'string') {
       return super.get(path);
     } else {
       this.lazyrouter().get(path, ...handlers);

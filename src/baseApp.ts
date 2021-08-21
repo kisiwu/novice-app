@@ -5,12 +5,14 @@ import core from 'express-serve-static-core';
 import routing, { IRouter, RequestHandler, RouteMeta } from '@novice1/routing';
 import { addReplyMiddleware } from './middlewares/reply';
 
+export interface FrameworkOptions {
+  auth?: RequestHandler[];
+  middlewares?: (core.RequestHandler | core.RequestHandlerParams)[];
+  validators?: RequestHandler[];
+}
+
 export interface Options {
-  framework?: {
-    auth?: RequestHandler[];
-    middlewares?: (core.RequestHandler | core.RequestHandlerParams)[];
-    validators?: RequestHandler[];
-  };
+  framework?: FrameworkOptions;
   routers?: IRouter[]
 }
 
@@ -115,11 +117,44 @@ export abstract class BaseApp implements IApp {
   addOptions(options: Options): BaseApp {
     if (options && typeof options === 'object') {
       if (options.framework) {
-        //this.addFrameworkConfig(options.framework);
+        this.addFrameworkOptions(options.framework);
       }
       if (options.routers) {
         this.addRouters(options.routers);
       }
+    }
+    return this;
+  }
+
+  addFrameworkOptions(options: FrameworkOptions): BaseApp {
+    const frameworkOpts: FrameworkOptions = this.#config.framework || {};
+    if (Array.isArray(options.middlewares)) {
+      const middlewares: (core.RequestHandler | core.RequestHandlerParams)[] = [];
+      options.middlewares.forEach(
+        element => {
+          middlewares.push(element);
+        });
+      frameworkOpts.middlewares = middlewares;
+    }
+    if (Array.isArray(options.auth)) {
+      const auth: RequestHandler[] = [];
+      options.auth.forEach(
+        element => {
+          if (typeof element === 'function') {
+            auth.push(element);
+          }
+        });
+      frameworkOpts.auth = auth;
+    }
+    if (Array.isArray(options.validators)) {
+      const validators: RequestHandler[] = [];
+      options.validators.forEach(
+        element => {
+          if (typeof element === 'function') {
+            validators.push(element);
+          }
+        });
+      frameworkOpts.validators = validators;
     }
     return this;
   }

@@ -9,11 +9,10 @@
     "url": "https://github.com/kisiwu/novice-app.git"
   },
   "scripts": {
-    "test": "kaukau --config test/config/testconfig.js",
     "doc": "typedoc",
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
-    "testsrc": "env TS_NODE_FILES=true kaukau --require ts-node/register --config kaukau-src.js",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\", \"noUnusedParameters\": false}' kaukau --require ts-node/register --config kaukau-src.js",
     "testlib": "kaukau --config kaukau-lib.js"
   },
   "author": "demingongo",

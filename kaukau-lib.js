@@ -10,19 +10,9 @@ module.exports = {
     ignoreLeaks: false,
     reporter: 'spec',
     retries: 0,
-    slow: 10000,
-    timeout: 30000,
+    slow: 100,
+    timeout: 2000,
     ui: 'bdd',
     color: true,
-  },
-  parameters: {
-    db: {
-      dialect: process.env.TEST_DB_DIALECT || 'mysql',
-      host: process.env.TEST_DB_HOSTNAME || 'localhost',
-      port: process.env.TEST_DB_PORT,
-      database: process.env.TEST_DB_NAME || 'ci',
-      username: process.env.TEST_DB_USERNAME || 'root',
-      password: process.env.TEST_DB_PASSWORD || ''
-    }
-  },
+  }
 };
