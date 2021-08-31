@@ -114,6 +114,11 @@ export abstract class BaseApp implements IApp {
     );
   }
 
+  /**
+   * 
+   * @param options Options to concatenate with current options.
+   * @returns 
+   */
   addOptions(options: Options): BaseApp {
     if (options && typeof options === 'object') {
       if (options.framework) {
