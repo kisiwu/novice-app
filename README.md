@@ -1,4 +1,4 @@
-# novice-app
+# @novice1/app
 
 Create [Express](https://expressjs.com) applications.
 
