@@ -41,10 +41,16 @@ describe('Starting server', function() {
   });
 
   it('should set (set, disable, enable)', function() {
-    app.disable('x-powered-by');
     app.set('env', 'test');
-    Log.info('env: %s', app.get('env'));
-    Log.info('x-powered-by disabled: %o', app.disabled('x-powered-by'));
+    expect(app.get('env')).to.equal('test');
+
+    app.disable('x-powered-by');
+    expect(app.disabled('x-powered-by')).to.be.true;
+    expect(app.enabled('x-powered-by')).to.be.false;
+
+    app.enable('x-powered-by');
+    expect(app.disabled('x-powered-by')).to.be.false;
+    expect(app.enabled('x-powered-by')).to.be.true;
   });
 
   it('shoud start server on localhost:8080 (app.listen)', function(done) {

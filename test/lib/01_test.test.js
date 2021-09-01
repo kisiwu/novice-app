@@ -3,7 +3,14 @@ const router = require('@novice1/routing')(),
 
 describe('Starting server', function() {
 
-  let app, server;
+  /**
+   * @type {FrameworkApp}
+   */
+  let app; 
+  /**
+   * @type {import('http').Server}
+   */
+  let server;
   const { logger: Log } = this.ctx.kaukau;
 
   router.get('/', (req, res) => {
@@ -35,10 +42,16 @@ describe('Starting server', function() {
   });
 
   it('should set (set, disable, enable)', function() {
-    app.disable('x-powered-by');
     app.set('env', 'test');
-    Log.info('env:', app.get('env'));
-    Log.info('x-powered-by disabled:', app.disabled('x-powered-by'));
+    expect(app.get('env')).to.equal('test');
+
+    app.disable('x-powered-by');
+    expect(app.disabled('x-powered-by')).to.be.true;
+    expect(app.enabled('x-powered-by')).to.be.false;
+
+    app.enable('x-powered-by');
+    expect(app.disabled('x-powered-by')).to.be.false;
+    expect(app.enabled('x-powered-by')).to.be.true;
   });
 
   it('shoud start server on localhost:8080 (app.listen)', function(done) {
