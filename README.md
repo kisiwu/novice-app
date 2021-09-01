@@ -115,3 +115,7 @@ server.listen(8000, '0.0.0.0', () => {
   console.log(app.meta)
 });
 ```
+## References
+
+- [Express](https://expressjs.com)
+- [@novice1/app](https://novice1.000webhostapp.com/app/)
