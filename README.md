@@ -12,7 +12,7 @@ $ npm install @novice1/app
 
 ```js
 const routing = require('@novice1/routing'),
-  { FrameworkApp } = require('../../lib/index');
+  { FrameworkApp } = require('@novice1/app');
 
 // Router
 const router = routing().get('/', (req, res) => {
