@@ -1,7 +1,7 @@
 {
   "name": "@novice1/app",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Create Express applications.",
   "main": "lib/index.js",
   "homepage": "https://novice1.000webhostapp.com/app/",
