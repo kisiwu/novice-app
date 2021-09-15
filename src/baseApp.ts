@@ -161,6 +161,7 @@ export abstract class BaseApp implements IApp {
         });
       frameworkOpts.validators = validators;
     }
+    this.#config.framework = frameworkOpts;
     return this;
   }
 
