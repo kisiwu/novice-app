@@ -21,7 +21,10 @@ export interface IApp {
   get server(): http.Server | undefined;
   addRouters(routers: IRouter[] | IRouter): IApp;
   addOptions(options: Options): IApp;
-  build(options?: http.ServerOptions): http.Server;
+  build<T extends http.ServerOptions = http.ServerOptions>(options?: T | null, mod?: {
+    createServer(requestListener?: http.RequestListener): http.Server;
+    createServer(options: T, requestListener?: http.RequestListener | undefined): http.Server;
+  }): http.Server;
   disable(setting: string): IApp;
   enable(setting: string): IApp;
   disabled(setting: string): boolean;
@@ -196,7 +199,20 @@ export abstract class BaseApp implements IApp {
     return this;
   }
 
-  build(options?: http.ServerOptions): http.Server {
+  /**
+   * 
+   * @param options 
+   * @param mod Module that will create the server (e.g.: require('https'))
+   * @example ```js
+   * const https = require('https');
+   * const server = app.build(HTTPS_SERVER_OPTIONS, https);
+   * server.listen(PORT);
+   * ```
+   */
+  build<T extends http.ServerOptions = http.ServerOptions>(options?: T | null, mod?: {
+    createServer(requestListener?: http.RequestListener): http.Server;
+    createServer(options: T, requestListener?: http.RequestListener | undefined): http.Server;
+  }): http.Server {
     if (!this.#server /*&& !this.#isBuilding*/) {
       this.#isBuilding = true;
 
@@ -207,7 +223,15 @@ export abstract class BaseApp implements IApp {
       this.#isBuilt = true;
       this.#isBuilding = false;
 
-      this.#server = http.createServer(options || {}, this.__app);
+      if (mod) {
+        if (options) {
+          this.#server = mod.createServer(options, this.__app);
+        } else {
+          this.#server = mod.createServer(this.__app);
+        }
+      } else {
+        this.#server = http.createServer(options || {}, this.__app);
+      }
     }
 
     return this.#server;

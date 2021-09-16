@@ -1,9 +1,7 @@
 import routing from '@novice1/routing';
-import { Server } from 'http';
+import http, { Server } from 'http';
 import { FrameworkApp } from '../../src/index';
 import { expect } from 'chai';
-
-  
 
 describe('Starting server', function() {
 
@@ -56,7 +54,8 @@ describe('Starting server', function() {
   it('shoud start server on localhost:8080 (app.listen)', function(done) {
     const port = 8080;
     const ip = '0.0.0.0';
-    server = app.listen(port, ip, () => {
+    server = app.build(null, http);
+    /*server = */app.listen(port, ip, () => {
       Log.info(`Application worker ${process.pid} started...`);
       console.log(app.meta)
       expect(app.meta)

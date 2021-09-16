@@ -115,6 +115,14 @@ server.listen(8000, '0.0.0.0', () => {
   console.log(app.meta)
 });
 ```
+
+```js
+const https = require('https');
+const httpsServerOptions = {};
+
+const server = app.build(httpsServerOptions, https);
+server.listen(8000);
+```
 ## References
 
 - [Express](https://expressjs.com)
