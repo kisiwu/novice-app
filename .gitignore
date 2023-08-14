@@ -2,6 +2,7 @@ private
 dev
 /lib
 docs
+.vscode
 
 # Logs
 logs
