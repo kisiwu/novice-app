@@ -126,4 +126,4 @@ server.listen(8000);
 ## References
 
 - [Express](https://expressjs.com)
-- [@novice1/app](https://novice1.000webhostapp.com/app/)
+- [@novice1/app](https://kisiwu.github.io/novice-app/latest/)
