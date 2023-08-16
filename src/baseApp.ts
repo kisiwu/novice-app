@@ -1,5 +1,6 @@
 import http from 'http';
 import net from 'net';
+import { ParsedQs } from 'qs';
 import express from 'express';
 import core from 'express-serve-static-core';
 import routing, { IRouter, RequestHandler, RouteMeta } from '@novice1/routing';
@@ -38,6 +39,9 @@ export interface IApp {
 export abstract class BaseApp implements IApp {
   #config: Options = {};
   #server?: http.Server;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  #errorRequestHandlers: core.RequestHandlerParams<any,any,any,any,any>[] = [];
 
   #isBuilding = false;
   #isBuilt = false;
@@ -115,6 +119,12 @@ export abstract class BaseApp implements IApp {
         this._registerRouter(router);
       }
     );
+  }
+
+  private _buildErrorRequestHandlers(): void {
+    if(this.#errorRequestHandlers?.length) {
+      this.__app.use(...this.#errorRequestHandlers);
+    }
   }
 
   /**
@@ -219,6 +229,8 @@ export abstract class BaseApp implements IApp {
       this._buildFramework();
 
       this._buildRoutes();
+
+      this._buildErrorRequestHandlers();
 
       this.#isBuilt = true;
       this.#isBuilding = false;
@@ -353,5 +365,26 @@ export abstract class BaseApp implements IApp {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(setting: string): any {
     return this.__app.get(setting);
+  }
+
+  //--- ERROR METHODS
+
+  useError<
+    P = core.ParamsDictionary,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ResBody = any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ReqBody = any,
+    ReqQuery = ParsedQs,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Locals extends Record<string, any> = Record<string, any>
+  >(
+    ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>): BaseApp {
+    if (!this.built) {
+      this.#errorRequestHandlers.push(...handlers);
+    } else {
+      this._app.use(...handlers);
+    }
+    return this;
   }
 }
