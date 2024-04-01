@@ -213,7 +213,8 @@ export abstract class BaseApp implements IApp {
    * 
    * @param options 
    * @param mod Module that will create the server (e.g.: require('https'))
-   * @example ```js
+   * @example 
+   * ```js
    * const https = require('https');
    * const server = app.build(HTTPS_SERVER_OPTIONS, https);
    * server.listen(PORT);

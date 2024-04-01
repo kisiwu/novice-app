@@ -14,9 +14,9 @@ describe('Starting server', function() {
   const { logger: Log } = this.ctx.kaukau;
 
   router.get('/', (req, res) => {
-    res.status.json('ok');
+    res.status(200).json('ok');
   }).put('/', (req, res) => {
-    res.status.json('ok');
+    res.status(200).json('ok');
   });
 
   it('should init app with config', function() {
