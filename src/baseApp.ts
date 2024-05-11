@@ -364,6 +364,12 @@ export abstract class BaseApp implements IApp {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  engine(ext: string, fn: (path: string, options: object, callback: (e: any, rendered?: string | undefined) => void) => void): this {
+    this.__app.engine(ext, fn)
+    return this
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(setting: string): any {
     return this.__app.get(setting);
   }
