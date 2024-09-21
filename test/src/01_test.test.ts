@@ -10,9 +10,9 @@ describe('Starting server', function() {
   let app: FrameworkApp, server: Server;
   const router = routing();
 
-  router.get('/', (req, res) => {
+  router.get('/', (_req, res) => {
     res.status(200).json('ok');
-  }).put('/', (req, res) => {
+  }).put('/', (_req, res) => {
     res.status(200).json('ok');
   });
 
@@ -20,10 +20,10 @@ describe('Starting server', function() {
     app = new FrameworkApp({
       framework: {
         auth: [
-          (req, res, next) => {
+          (_req, _res, next) => {
             next();
           },
-          (req, res, next) => {
+          (_req, _res, next) => {
             next();
           }
         ],

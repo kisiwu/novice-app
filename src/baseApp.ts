@@ -4,7 +4,6 @@ import { ParsedQs } from 'qs';
 import express from 'express';
 import core from 'express-serve-static-core';
 import routing, { IRouter, RequestHandler, RouteMeta } from '@novice1/routing';
-import { addReplyMiddleware } from './middlewares/reply';
 
 export interface FrameworkOptions {
   auth?: RequestHandler[];
@@ -105,7 +104,7 @@ export abstract class BaseApp implements IApp {
     this.__app.use(this.__router);
 
     // register framework's middlewares
-    this.__router.use(addReplyMiddleware(this));
+    // ... no more framework's middlewares
 
     // register user's middlewares
     if (this.#config.framework?.middlewares?.length) {
