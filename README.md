@@ -1,6 +1,6 @@
 # @novice1/app
 
-Create [Express](https://expressjs.com) applications.
+Create [Express v5](https://expressjs.com) applications.
 
 ## Installation
 
