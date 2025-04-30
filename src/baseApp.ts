@@ -131,7 +131,7 @@ export abstract class BaseApp implements IApp {
    * @param options Options to concatenate with current options.
    * @returns 
    */
-  addOptions(options: Options): BaseApp {
+  addOptions(options: Options): this {
     if (options && typeof options === 'object') {
       if (options.framework) {
         this.addFrameworkOptions(options.framework);
@@ -143,7 +143,7 @@ export abstract class BaseApp implements IApp {
     return this;
   }
 
-  addFrameworkOptions(options: FrameworkOptions): BaseApp {
+  addFrameworkOptions(options: FrameworkOptions): this {
     const frameworkOpts: FrameworkOptions = this.#config.framework || {};
     if (Array.isArray(options.middlewares)) {
       const middlewares: (core.RequestHandler | core.RequestHandlerParams)[] = [];
@@ -177,7 +177,7 @@ export abstract class BaseApp implements IApp {
     return this;
   }
 
-  addRouters(routers: IRouter[] | IRouter): BaseApp {
+  addRouters(routers: IRouter[] | IRouter): this {
     if (!this.built) {
       if (routers) {
         if (Array.isArray(routers)) {
@@ -334,7 +334,7 @@ export abstract class BaseApp implements IApp {
 
   //--- EXPRESS METHODS
 
-  disable(setting: string): BaseApp {
+  disable(setting: string): this {
     this.__app.disable(setting);
     return this;
   }
@@ -343,7 +343,7 @@ export abstract class BaseApp implements IApp {
     return this.__app.disabled(setting);
   }
 
-  enable(setting: string): BaseApp {
+  enable(setting: string): this {
     this.__app.enable(setting);
     return this;
   }
@@ -352,12 +352,12 @@ export abstract class BaseApp implements IApp {
     return this.__app.enabled(setting);
   }
 
-  on(event: string, callback: (parent: core.Application) => void): BaseApp {
+  on(event: string, callback: (parent: core.Application) => void): this {
     this.__app.on(event, callback);
     return this;
   }
 
-  set(setting: string, val?: unknown): BaseApp {
+  set(setting: string, val?: unknown): this {
     this.__app.set(setting, val);
     return this;
   }
@@ -385,7 +385,7 @@ export abstract class BaseApp implements IApp {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Locals extends Record<string, any> = Record<string, any>
   >(
-    ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>): BaseApp {
+    ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>): this {
     if (!this.built) {
       this.#errorRequestHandlers.push(...handlers);
     } else {

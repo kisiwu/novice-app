@@ -1,5 +1,6 @@
 const router = require('@novice1/routing')(),
-      { FrameworkApp } = require('../../lib/index');
+      { FrameworkApp } = require('../../lib/index'),
+      { expect } = require('chai');
 
 describe('Starting server', function() {
 

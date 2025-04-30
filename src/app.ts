@@ -16,32 +16,32 @@ export class FrameworkApp extends BaseApp {
 
   //--- OVERRIDE METHODS
 
-  addOptions(options: Options): FrameworkApp {
+  addOptions(options: Options): this {
     super.addOptions(options);
     return this;
   }
 
-  addRouters(routers: IRouter[] | IRouter): FrameworkApp {
+  addRouters(routers: IRouter[] | IRouter): this {
     super.addRouters(routers);
     return this;
   }
 
-  disable(setting: string): FrameworkApp {
+  disable(setting: string): this {
     super.disable(setting);
     return this;
   }
 
-  enable(setting: string): FrameworkApp {
+  enable(setting: string): this {
     super.enable(setting);
     return this;
   }
 
-  on(event: string, callback: (parent: core.Application) => void): FrameworkApp {
+  on(event: string, callback: (parent: core.Application) => void): this {
     super.on(event, callback);
     return this;
   }
 
-  set(setting: string, val?: unknown): FrameworkApp {
+  set(setting: string, val?: unknown): this {
     super.set(setting, val);
     return this;
   }
@@ -50,7 +50,7 @@ export class FrameworkApp extends BaseApp {
 
   param(
     name: string | string[],
-    handler: core.RequestParamHandler): FrameworkApp {
+    handler: core.RequestParamHandler): this {
     if (Array.isArray(name)) {
       name.forEach(n => {
         this.param(n, handler);
@@ -76,7 +76,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   all<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -92,7 +92,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   all<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,7 +107,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   all<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,7 +122,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   all<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -136,7 +136,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   all<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -150,7 +150,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   all<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,7 +163,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   all<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -176,11 +176,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  all(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  all(path: core.PathParams, subApplication: core.Application): this;
   all<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().all(path, ...handlers);
     return this;
   }
@@ -202,7 +202,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   get<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -218,7 +218,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   get<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -233,7 +233,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   get<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -248,7 +248,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   get<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -262,7 +262,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   get<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -276,7 +276,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   get<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -289,7 +289,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   get<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -302,13 +302,12 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  get(path: core.PathParams, subApplication: core.Application): FrameworkApp;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): this;
+  get(path: core.PathParams, subApplication: core.Application): this;
   get<Path extends string>(
     path: Path | string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...handlers: Array<RequestHandler>): FrameworkApp | any {
+    ...handlers: Array<RequestHandler>): this | any {
     if (!handlers.length && typeof path === 'string') {
       return super.get(path);
     } else {
@@ -332,7 +331,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   post<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -348,7 +347,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   post<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -363,7 +362,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   post<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -378,7 +377,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   post<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -392,7 +391,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   post<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -406,7 +405,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   post<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -419,7 +418,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   post<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -432,11 +431,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  post(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  post(path: core.PathParams, subApplication: core.Application): this;
   post<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().post(path, ...handlers);
     return this;
   }
@@ -456,7 +455,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   put<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -472,7 +471,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   put<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -487,7 +486,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   put<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -502,7 +501,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   put<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -516,7 +515,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   put<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -530,7 +529,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   put<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -543,7 +542,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   put<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -556,11 +555,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  put(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  put(path: core.PathParams, subApplication: core.Application): this;
   put<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().put(path, ...handlers);
     return this;
   }
@@ -580,7 +579,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   delete<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -596,7 +595,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   delete<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -611,7 +610,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   delete<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -626,7 +625,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   delete<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -640,7 +639,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   delete<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -654,7 +653,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   delete<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -667,7 +666,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   delete<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -680,11 +679,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  delete(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  delete(path: core.PathParams, subApplication: core.Application): this;
   delete<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().delete(path, ...handlers);
     return this;
   }
@@ -704,7 +703,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   patch<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -720,7 +719,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   patch<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -735,7 +734,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   patch<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -750,7 +749,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   patch<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -764,7 +763,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   patch<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -778,7 +777,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   patch<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -791,7 +790,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   patch<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -804,11 +803,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  patch(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  patch(path: core.PathParams, subApplication: core.Application): this;
   patch<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().patch(path, ...handlers);
     return this;
   }
@@ -828,7 +827,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   options<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -844,7 +843,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   options<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -859,7 +858,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   options<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -874,7 +873,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   options<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -888,7 +887,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   options<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -902,7 +901,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   options<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -915,7 +914,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   options<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -928,11 +927,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  options(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  options(path: core.PathParams, subApplication: core.Application): this;
   options<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().options(path, ...handlers);
     return this;
   }
@@ -952,7 +951,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<Route, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   head<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -968,7 +967,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<Path, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   head<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -983,7 +982,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettings<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   head<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -998,7 +997,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: RouteSettingsParams<core.PathParams, P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals, MetaResType>>
-  ): FrameworkApp;
+  ): this;
   head<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -1012,7 +1011,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   head<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -1026,7 +1025,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Path,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   head<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1039,7 +1038,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   head<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1052,17 +1051,17 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  head(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  head(path: core.PathParams, subApplication: core.Application): this;
   head<Path extends string>(
     path: Path,
-    ...handlers: Array<RequestHandler>): FrameworkApp {
+    ...handlers: Array<RequestHandler>): this {
     this.lazyrouter().head(path, ...handlers);
     return this;
   }
 
-  use(...handlers: Array<core.RequestHandler<core.RouteParameters<string>>>): FrameworkApp;
-  use(...handlers: Array<core.RequestHandlerParams<core.RouteParameters<string>>>): FrameworkApp;
+  use(...handlers: Array<core.RequestHandler<core.RouteParameters<string>>>): this;
+  use(...handlers: Array<core.RequestHandlerParams<core.RouteParameters<string>>>): this;
   use<
     P = core.RouteParameters<string>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1074,7 +1073,7 @@ export class FrameworkApp extends BaseApp {
     Locals extends Record<string, any> = Record<string, any>
   >(
     ...handlers: Array<core.RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     P = core.RouteParameters<string>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1086,7 +1085,7 @@ export class FrameworkApp extends BaseApp {
     Locals extends Record<string, any> = Record<string, any>
   >(
     ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1098,7 +1097,7 @@ export class FrameworkApp extends BaseApp {
     Locals extends Record<string, any> = Record<string, any>
   >(
     ...handlers: Array<core.RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1110,7 +1109,7 @@ export class FrameworkApp extends BaseApp {
     Locals extends Record<string, any> = Record<string, any>
   >(
     ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     Route extends string,
     P = core.RouteParameters<Route>,
@@ -1124,7 +1123,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: Route,
     ...handlers: Array<core.RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     Path extends string,
     P = core.RouteParameters<Path>,
@@ -1140,7 +1139,7 @@ export class FrameworkApp extends BaseApp {
     path: Path,
     // tslint:disable-next-line no-unnecessary-generics (This generic is meant to be passed explicitly.)
     ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1153,7 +1152,7 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<core.RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
+  ): this;
   use<
     P = core.ParamsDictionary,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1166,11 +1165,11 @@ export class FrameworkApp extends BaseApp {
   >(
     path: core.PathParams,
     ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>
-  ): FrameworkApp;
-  use(path: core.PathParams, subApplication: core.Application): FrameworkApp;
+  ): this;
+  use(path: core.PathParams, subApplication: core.Application): this;
   use<Path extends string>(
     path: Path | core.RequestHandler<core.RouteParameters<string>>,
-    ...handlers: Array<core.RequestHandler<core.RouteParameters<string>>>): FrameworkApp {
+    ...handlers: Array<core.RequestHandler<core.RouteParameters<string>>>): this {
     const router = this.lazyrouter();
     if (typeof path === 'function') {
       router.use(path, ...handlers);
