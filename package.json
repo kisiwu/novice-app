@@ -18,6 +18,9 @@
   },
   "author": "demingongo",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@novice1/logger": "^1.6.0",
     "@novice1/routing": "^2.0.0",
