@@ -1,7 +1,7 @@
 {
   "name": "@novice1/app",
   "private": false,
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Create Express applications.",
   "main": "lib/index.js",
   "homepage": "https://kisiwu.github.io/novice-app/latest/",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@novice1/logger": "^1.6.0",
-    "@novice1/routing": "^2.0.0",
+    "@novice1/routing": "^2.0.1",
     "express": "^5.1.0",
     "tslib": "^2.8.1"
   },
