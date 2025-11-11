@@ -352,7 +352,7 @@ export abstract class BaseApp implements IApp {
     return this.__app.enabled(setting);
   }
 
-  on(event: string, callback: (parent: core.Application) => void): this {
+  on(event: 'mount', callback: (parent: core.Application) => void): this {
     this.__app.on(event, callback);
     return this;
   }

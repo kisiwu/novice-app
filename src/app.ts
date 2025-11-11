@@ -36,7 +36,7 @@ export class FrameworkApp extends BaseApp {
     return this;
   }
 
-  on(event: string, callback: (parent: core.Application) => void): this {
+  on(event: 'mount', callback: (parent: core.Application) => void): this {
     super.on(event, callback);
     return this;
   }
