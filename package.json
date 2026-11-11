@@ -1,7 +1,7 @@
 {
   "name": "@novice1/app",
   "private": false,
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Build Express applications on top of @novice1/routing.",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
@@ -58,7 +58,13 @@
   },
   "peerDependencies": {
     "@novice1/routing": "^2.1.0",
+    "@types/express": "^5.0.6",
     "express": "^5.2.1"
+  },
+  "peerDependenciesMeta": {
+    "@types/express": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@novice1/logger": "^2.0.1",
