@@ -2,7 +2,7 @@
   "name": "@novice1/app",
   "private": false,
   "version": "0.9.5",
-  "description": "Create Express applications.",
+  "description": "Build Express applications on top of @novice1/routing.",
   "main": "lib/index.js",
   "types": "./lib/index.d.ts",
   "exports": {

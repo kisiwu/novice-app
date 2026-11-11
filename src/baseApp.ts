@@ -1,8 +1,8 @@
 import routing, { IRouter, RequestHandler, RouteMeta } from '@novice1/routing';
 import express from 'express';
 import core from 'express-serve-static-core';
-import http from 'http';
-import net from 'net';
+import http from 'node:http';
+import net from 'node:net';
 import { ParsedQs } from 'qs';
 
 export interface FrameworkOptions {
