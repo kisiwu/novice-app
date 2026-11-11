@@ -1,9 +1,9 @@
+import routing, { IRouter, RequestHandler, RouteMeta } from '@novice1/routing';
+import express from 'express';
+import core from 'express-serve-static-core';
 import http from 'http';
 import net from 'net';
 import { ParsedQs } from 'qs';
-import express from 'express';
-import core from 'express-serve-static-core';
-import routing, { IRouter, RequestHandler, RouteMeta } from '@novice1/routing';
 
 export interface FrameworkOptions {
   auth?: RequestHandler[];
@@ -13,7 +13,7 @@ export interface FrameworkOptions {
 
 export interface Options {
   framework?: FrameworkOptions;
-  routers?: IRouter[]
+  routers?: IRouter[];
 }
 
 export interface IApp {
@@ -21,10 +21,13 @@ export interface IApp {
   get server(): http.Server | undefined;
   addRouters(routers: IRouter[] | IRouter): IApp;
   addOptions(options: Options): IApp;
-  build<T extends http.ServerOptions = http.ServerOptions>(options?: T | null, mod?: {
-    createServer(requestListener?: http.RequestListener): http.Server;
-    createServer(options: T, requestListener?: http.RequestListener | undefined): http.Server;
-  }): http.Server;
+  build<T extends http.ServerOptions = http.ServerOptions>(
+    options?: T | null,
+    mod?: {
+      createServer(requestListener?: http.RequestListener): http.Server;
+      createServer(options: T, requestListener?: http.RequestListener | undefined): http.Server;
+    }
+  ): http.Server;
   disable(setting: string): IApp;
   enable(setting: string): IApp;
   disabled(setting: string): boolean;
@@ -40,14 +43,13 @@ export abstract class BaseApp implements IApp {
   #server?: http.Server;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  #errorRequestHandlers: core.RequestHandlerParams<any,any,any,any,any>[] = [];
+  #errorRequestHandlers: core.RequestHandlerParams<any, any, any, any, any>[] = [];
 
   #isBuilding = false;
   #isBuilt = false;
 
   protected __app: express.Application;
   protected __router: IRouter;
-
 
   /**
    * Express Application
@@ -86,14 +88,10 @@ export abstract class BaseApp implements IApp {
   }
 
   private _registerRouter(router: IRouter): void {
-    if (
-      this.#config?.framework?.validators?.length
-      && typeof router.setValidatorsIfNone === 'function') {
+    if (this.#config?.framework?.validators?.length && typeof router.setValidatorsIfNone === 'function') {
       router.setValidatorsIfNone(this.#config.framework.validators);
     }
-    if (
-      this.#config?.framework?.auth?.length
-      && typeof router.setAuthHandlersIfNone === 'function') {
+    if (this.#config?.framework?.auth?.length && typeof router.setAuthHandlersIfNone === 'function') {
       router.setAuthHandlersIfNone(this.#config.framework.auth);
     }
     this.__router.use(router);
@@ -113,23 +111,21 @@ export abstract class BaseApp implements IApp {
   }
 
   private _buildRoutes(): void {
-    this.#config.routers?.forEach(
-      router => {
-        this._registerRouter(router);
-      }
-    );
+    this.#config.routers?.forEach((router) => {
+      this._registerRouter(router);
+    });
   }
 
   private _buildErrorRequestHandlers(): void {
-    if(this.#errorRequestHandlers?.length) {
+    if (this.#errorRequestHandlers?.length) {
       this.__app.use(...this.#errorRequestHandlers);
     }
   }
 
   /**
-   * 
+   *
    * @param options Options to concatenate with current options.
-   * @returns 
+   * @returns
    */
   addOptions(options: Options): this {
     if (options && typeof options === 'object') {
@@ -147,30 +143,27 @@ export abstract class BaseApp implements IApp {
     const frameworkOpts: FrameworkOptions = this.#config.framework || {};
     if (Array.isArray(options.middlewares)) {
       const middlewares: (core.RequestHandler | core.RequestHandlerParams)[] = [];
-      options.middlewares.forEach(
-        element => {
-          middlewares.push(element);
-        });
+      options.middlewares.forEach((element) => {
+        middlewares.push(element);
+      });
       frameworkOpts.middlewares = middlewares;
     }
     if (Array.isArray(options.auth)) {
       const auth: RequestHandler[] = [];
-      options.auth.forEach(
-        element => {
-          if (typeof element === 'function') {
-            auth.push(element);
-          }
-        });
+      options.auth.forEach((element) => {
+        if (typeof element === 'function') {
+          auth.push(element);
+        }
+      });
       frameworkOpts.auth = auth;
     }
     if (Array.isArray(options.validators)) {
       const validators: RequestHandler[] = [];
-      options.validators.forEach(
-        element => {
-          if (typeof element === 'function') {
-            validators.push(element);
-          }
-        });
+      options.validators.forEach((element) => {
+        if (typeof element === 'function') {
+          validators.push(element);
+        }
+      });
       frameworkOpts.validators = validators;
     }
     this.#config.framework = frameworkOpts;
@@ -181,12 +174,10 @@ export abstract class BaseApp implements IApp {
     if (!this.built) {
       if (routers) {
         if (Array.isArray(routers)) {
-          routers.forEach(
-            router => {
-              this.#config.routers = this.#config.routers || [];
-              this.#config.routers.push(router);
-            }
-          );
+          routers.forEach((router) => {
+            this.#config.routers = this.#config.routers || [];
+            this.#config.routers.push(router);
+          });
         } else {
           this.#config.routers = this.#config.routers || [];
           this.#config.routers.push(routers);
@@ -195,11 +186,9 @@ export abstract class BaseApp implements IApp {
     } else {
       if (routers) {
         if (Array.isArray(routers)) {
-          routers.forEach(
-            router => {
-              this._registerRouter(router);
-            }
-          );
+          routers.forEach((router) => {
+            this._registerRouter(router);
+          });
         } else {
           this._registerRouter(routers);
         }
@@ -209,20 +198,23 @@ export abstract class BaseApp implements IApp {
   }
 
   /**
-   * 
-   * @param options 
+   *
+   * @param options
    * @param mod Module that will create the server (e.g.: require('https'))
-   * @example 
+   * @example
    * ```js
    * const https = require('https');
    * const server = app.build(HTTPS_SERVER_OPTIONS, https);
    * server.listen(PORT);
    * ```
    */
-  build<T extends http.ServerOptions = http.ServerOptions>(options?: T | null, mod?: {
-    createServer(requestListener?: http.RequestListener): http.Server;
-    createServer(options: T, requestListener?: http.RequestListener | undefined): http.Server;
-  }): http.Server {
+  build<T extends http.ServerOptions = http.ServerOptions>(
+    options?: T | null,
+    mod?: {
+      createServer(requestListener?: http.RequestListener): http.Server;
+      createServer(options: T, requestListener?: http.RequestListener | undefined): http.Server;
+    }
+  ): http.Server {
     if (!this.#server /*&& !this.#isBuilding*/) {
       this.#isBuilding = true;
 
@@ -262,7 +254,8 @@ export abstract class BaseApp implements IApp {
     a1?: number | string | net.ListenOptions,
     a2?: string | number | (() => void),
     a3?: number | (() => void),
-    a4?: () => void): http.Server {
+    a4?: () => void
+  ): http.Server {
     const server = this.build();
     let r: http.Server;
     if (typeof a1 === 'number') {
@@ -362,10 +355,13 @@ export abstract class BaseApp implements IApp {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  engine(ext: string, fn: (path: string, options: object, callback: (e: any, rendered?: string | undefined) => void) => void): this {
-    this.__app.engine(ext, fn)
-    return this
+  engine(
+    ext: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fn: (path: string, options: object, callback: (e: any, rendered?: string | undefined) => void) => void
+  ): this {
+    this.__app.engine(ext, fn);
+    return this;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -383,9 +379,8 @@ export abstract class BaseApp implements IApp {
     ReqBody = any,
     ReqQuery = ParsedQs,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Locals extends Record<string, any> = Record<string, any>
-  >(
-    ...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>): this {
+    Locals extends Record<string, any> = Record<string, any>,
+  >(...handlers: Array<core.RequestHandlerParams<P, ResBody, ReqBody, ReqQuery, Locals>>): this {
     if (!this.built) {
       this.#errorRequestHandlers.push(...handlers);
     } else {

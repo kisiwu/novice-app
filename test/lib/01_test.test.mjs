@@ -1,13 +1,15 @@
-const router = require('@novice1/routing')(),
-      { FrameworkApp } = require('../../lib/index'),
-      { expect } = require('chai');
+import routing from '@novice1/routing';
+import { expect } from 'chai';
+import { FrameworkApp } from '../../lib/index.js';
 
-describe('Starting server', function() {
+const router = routing();
+
+describe('Starting server', function () {
 
   /**
    * @type {FrameworkApp}
    */
-  let app; 
+  let app;
   /**
    * @type {import('http').Server}
    */
@@ -20,7 +22,7 @@ describe('Starting server', function() {
     res.status(200).json('ok');
   });
 
-  it('should init app with config', function() {
+  it('should init app with config', function () {
     app = new FrameworkApp({
       framework: {
         auth: [
@@ -36,13 +38,13 @@ describe('Starting server', function() {
     })
   });
 
-  it('should add more config (app.addOptions, app.set, app.)', function() {
+  it('should add more config (app.addOptions, app.set, app.)', function () {
     app.addOptions({
       routers: router
     });
   });
 
-  it('should set (set, disable, enable)', function() {
+  it('should set (set, disable, enable)', function () {
     app.set('env', 'test');
     expect(app.get('env')).to.equal('test');
 
@@ -55,18 +57,18 @@ describe('Starting server', function() {
     expect(app.enabled('x-powered-by')).to.be.true;
   });
 
-  it('shoud start server on localhost:8080 (app.listen)', function(done) {
+  it('shoud start server on localhost:8080 (app.listen)', function (done) {
     var port = 8080, ip = '0.0.0.0'
-    server = app.listen(port, ip, function() {
+    server = app.listen(port, ip, function () {
       Log.info(`Application worker ${process.pid} started...`);
       expect(app.meta)
-      .to.be.an('array', '\'.meta\' is not an array')
-      .that.has.lengthOf(2, '\'.meta\' has not a length of 2');
+        .to.be.an('array', '\'.meta\' is not an array')
+        .that.has.lengthOf(2, '\'.meta\' has not a length of 2');
       done();
     });
   });
 
-  it('shoud stop server (server.close)', function(done) {
+  it('shoud stop server (server.close)', function (done) {
     server.close(() => {
       Log.info('Application stopped');
       done();

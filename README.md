@@ -11,8 +11,8 @@ $ npm install @novice1/app
 ## Usage
 
 ```js
-const routing = require('@novice1/routing'),
-  { FrameworkApp } = require('@novice1/app');
+import routing from '@novice1/routing';
+import { FrameworkApp } from '@novice1/app';
 
 // Router
 const router = routing().get('/', (req, res) => {
@@ -117,7 +117,7 @@ server.listen(8000, '0.0.0.0', () => {
 ```
 
 ```js
-const https = require('https');
+import https from 'https';
 const httpsServerOptions = {};
 
 const server = app.build(httpsServerOptions, https);

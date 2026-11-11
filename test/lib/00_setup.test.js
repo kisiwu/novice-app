@@ -1,1 +1,0 @@
-require('debug').enable('@novice1/app*'); // Enable logs

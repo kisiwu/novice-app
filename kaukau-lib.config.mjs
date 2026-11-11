@@ -1,10 +1,10 @@
-import { defineConfig } from 'kaukau/config'
+import { defineConfig } from 'kaukau/config';
 
 export default defineConfig({
   enableLogs: true,
   exitOnFail: true,
   files: 'test/lib',
-  ext: '.test.js',
+  ext: '.test.mjs',
   options: {
     bail: false,
     fullTrace: true,
@@ -16,5 +16,5 @@ export default defineConfig({
     timeout: 2000,
     ui: 'bdd',
     color: true,
-  }
-})
+  },
+});
